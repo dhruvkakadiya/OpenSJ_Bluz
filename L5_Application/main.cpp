@@ -32,6 +32,72 @@
 #define IMU                     0
 static uint8_t recv_buffer;
 QueueHandle_t receive_queue1;
+QueueHandle_t accel_queue;
+
+typedef enum {
+    invalid = 0,
+    up,
+    down,
+    left,
+    right
+}orientation_t;
+
+char check_orientation(void){
+    int tmp_x = AS.getX();
+    int tmp_z = AS.getZ();
+    char data;
+    if(tmp_x>900){
+        data = left;
+        LE.setAll(1);
+    }
+    else if(tmp_x<-900){
+        data = right;
+        LE.setAll(2);
+    }
+    else if(tmp_z>900){
+        data = up;
+        LE.setAll(4);
+    }
+    else if(tmp_z<-900){
+        data = down;
+        LE.setAll(8);
+    }
+    else{
+        data = invalid;
+        LE.setAll(0);
+    }
+    return data;
+}
+
+void receive_orientation(void *p){
+    char rec;
+    while(1){
+        if(xQueueReceive(accel_queue,&rec,portMAX_DELAY)){
+            printf("Received data..\n");
+        }
+        else{
+            printf("failed receiving\n");
+        }
+
+    }
+}
+
+void send_orientation(void *p){
+    char send;
+    while(1){
+        send = check_orientation();
+        printf("Sending...\n");
+        if(xQueueSend(accel_queue,&send,portMAX_DELAY)){
+            printf("Sent...\n");
+        }
+        else{
+            printf("Failed sending");
+        }
+        vTaskDelay(1000);
+    }
+}
+
+
 
 /**************************** UART-3 Interrupt Handler ******************/
 extern "C"
@@ -103,33 +169,13 @@ class UART_Task: public scheduler_task
 
         bool run(void *p)
         {
-            uint8_t rec;
-            uint8_t buffer[16];
-            uint8_t trans_char = 'A';
-            for(int i=1;i<=1;i++){
-                if(xQueueReceiveFromISR(receive_queue1,&rec,0)){
-                    #if IMU
-                        // Save all received data to the buffer
-                        buffer[i-1] = rec;
-                    #else
-                        // Received data
-                        printf("Rec[%d]: %c\n",i,rec);
-                    #endif
-                }
-            }
-            #if IMU
-                // Print Received yaw angle from IMU
-                printf("IMU: %s\n",buffer);
-                // Yaw Reading command to IMU sensor
-                uart_transmit('#');
-                uart_transmit('f');
-            #else
-                // Send 16 bytes
-                for(int i=1;i<=1;i++){
-                    uart_transmit(++rec);
-                }
-            #endif
+            static uint8_t trans_char = 'A';
 
+            uart_transmit(trans_char++);
+
+            if(trans_char=='Z'){
+                trans_char = 'A';
+            }
             vTaskDelay(500);
             return true;
         }
