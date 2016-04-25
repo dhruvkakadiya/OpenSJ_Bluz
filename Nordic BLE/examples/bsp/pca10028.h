@@ -15,8 +15,8 @@
 // LEDs definitions for PCA10028
 #define LEDS_NUMBER    4
 
-#define LED_START      21
-#define LED_1          21
+#define LED_START      11//21
+#define LED_1          11//21
 #define LED_2          22
 #define LED_3          23
 #define LED_4          24
@@ -66,7 +66,7 @@
 #define TX_PIN_NUMBER  9
 #define CTS_PIN_NUMBER 10
 #define RTS_PIN_NUMBER 8
-#define HWFC           true
+#define HWFC           false
 
 #define SPIS_MISO_PIN  28    // SPI MISO signal. 
 #define SPIS_CSN_PIN   12    // SPI CSN signal. 

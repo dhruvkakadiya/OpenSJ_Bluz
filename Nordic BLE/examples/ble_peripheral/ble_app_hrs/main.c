@@ -53,7 +53,7 @@
 #define WAKEUP_BUTTON_ID                 0                                          /**< Button used to wake up the application. */
 #define BOND_DELETE_ALL_BUTTON_ID        1                                          /**< Button used for deleting all bonded centrals during startup. */
 
-#define DEVICE_NAME                      "Nordic_HRM"                               /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                      "OpenSJ Bluz"                               /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME                "NordicSemiconductor"                      /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                 300                                         /**< The advertising interval (in units of 0.625 ms. This value corresponds to 25 ms). */
 #define APP_ADV_TIMEOUT_IN_SECONDS       180                                        /**< The advertising timeout in units of seconds. */
@@ -106,6 +106,11 @@
 STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                     /** When having DFU Service support in application the Service Changed Characteristic should always be present. */
 #endif // BLE_DFU_APP_SUPPORT
 
+#define DFU_PIN													7
+#define MODE_PIN												11
+#define CONNECTED_LED										19
+#define MODE_LED												18
+#define FACTORY_RESET										16
 
 static uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID;   /**< Handle of the current connection. */
 static ble_bas_t                         m_bas;                                     /**< Structure used to identify the battery service. */
@@ -133,6 +138,20 @@ static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_HEART_RATE_SERVICE,         BLE_UUI
 static ble_dfu_t m_dfus; /**< Structure used to identify the DFU service. */
 #endif // BLE_DFU_APP_SUPPORT    
 
+
+static void BlueFruitInit(void)
+{
+		nrf_gpio_cfg_output(CONNECTED_LED); 
+		nrf_gpio_cfg_output(MODE_LED);
+		
+		nrf_gpio_cfg_input(DFU_PIN,NRF_GPIO_PIN_PULLUP);
+		nrf_gpio_cfg_input(MODE_PIN,NRF_GPIO_PIN_PULLUP);
+	
+		// Turn off both LEDs
+		nrf_gpio_pin_clear(CONNECTED_LED);
+		nrf_gpio_pin_clear(MODE_LED);
+		
+}
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -220,6 +239,8 @@ static void heart_rate_meas_timeout_handler(void * p_context)
     // NOTE: An application will normally not do this. It is done here just for testing generation
     //       of messages without RR Interval measurements.
     m_rr_interval_enabled = ((cnt % 3) != 0);
+		
+		nrf_gpio_pin_toggle(MODE_LED);
 }
 
 
@@ -340,8 +361,9 @@ static void advertising_stop(void)
     err_code = sd_ble_gap_adv_stop();
     APP_ERROR_CHECK(err_code);
 
-    err_code = bsp_indication_set(BSP_INDICATE_IDLE);
-    APP_ERROR_CHECK(err_code);
+  //  err_code = bsp_indication_set(BSP_INDICATE_IDLE);
+  //  APP_ERROR_CHECK(err_code);
+		nrf_gpio_pin_clear(MODE_LED);
 }
 
 
@@ -661,12 +683,14 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
     switch (p_ble_evt->header.evt_id)
     {
         case BLE_GAP_EVT_CONNECTED:
-            err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
-            APP_ERROR_CHECK(err_code);
+						nrf_gpio_pin_set(CONNECTED_LED);
+            //err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
+            //APP_ERROR_CHECK(err_code);
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             break;
 
         case BLE_GAP_EVT_DISCONNECTED:
+						nrf_gpio_pin_clear(CONNECTED_LED);
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
             break;
 
@@ -723,7 +747,7 @@ static void ble_stack_init(void)
     uint32_t err_code;
 
     // Initialize the SoftDevice handler module.
-    SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_XTAL_20_PPM, NULL);
+    SOFTDEVICE_HANDLER_INIT(NRF_CLOCK_LFCLKSRC_RC_250_PPM_250MS_CALIBRATION, NULL);
 
 #ifdef S110
     // Enable BLE stack.
@@ -852,11 +876,11 @@ int main(void)
     ble_stack_init();
     timers_init();
     APP_GPIOTE_INIT(1);
-
-    err_code = bsp_init(BSP_INIT_LED | BSP_INIT_BUTTONS,
-                        APP_TIMER_TICKS(100, APP_TIMER_PRESCALER),
-                        NULL);
-    APP_ERROR_CHECK(err_code);
+		BlueFruitInit();
+   // err_code = bsp_init(BSP_INIT_LED | BSP_INIT_BUTTONS,
+                        //APP_TIMER_TICKS(100, APP_TIMER_PRESCALER),
+                        //NULL);
+   // APP_ERROR_CHECK(err_code);
 
     device_manager_init();
     gap_params_init();
