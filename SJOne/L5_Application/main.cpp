@@ -163,7 +163,7 @@ class UART_Task: public scheduler_task
         bool init(void)
         {
             receive_queue1 = xQueueCreate(20, 1*sizeof(char));    //It will create queue of 10 characters
-            uart_init(9600);
+            uart_init(38400);
             return true;
         }
 
