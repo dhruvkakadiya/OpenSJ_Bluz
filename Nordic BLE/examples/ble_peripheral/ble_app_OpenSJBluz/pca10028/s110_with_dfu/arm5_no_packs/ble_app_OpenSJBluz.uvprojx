@@ -371,9 +371,9 @@
             <vShortWch>0</vShortWch>
             <VariousControls>
               <MiscControls>--c99</MiscControls>
-              <Define> BLE_DFU_APP_SUPPORT BLE_STACK_SUPPORT_REQD S110 BOARD_PCA10028 SOFTDEVICE_PRESENT NRF51</Define>
+              <Define>BLE_DFU_APP_SUPPORT BLE_STACK_SUPPORT_REQD S110 BOARD_PCA10028 SOFTDEVICE_PRESENT NRF51</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\config;..\..\..\..\..\..\components\softdevice\s110\headers;..\..\..\..\..\..\components\libraries\bootloader_dfu;..\..\..\..\..\..\components\ble\ble_services\ble_dfu;..\..\..\..\..\bsp;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\ble\common;..\..\..\..\..\..\components\libraries\sensorsim;..\..\..\..\..\..\components\ble\ble_services\ble_hrs;..\..\..\..\..\..\components\ble\ble_services\ble_dis;..\..\..\..\..\..\components\ble\ble_services\ble_bas;..\..\..\..\..\..\components\ble\ble_advertising;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\device;..\..\..\..\..\..\components\toolchain;..\..\..\..\..\..\components\libraries\fifo;..\..\..\..\..\..\components\libraries\button;..\..\..\..\..\..\components\ble\device_manager;..\..\..\..\..\..\components\softdevice\common\softdevice_handler;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\libraries\gpiote;..\..\..\..\..\..\components\drivers_nrf\pstorage;..\..\..\..\..\..\components\libraries\trace</IncludePath>
+              <IncludePath>..\..\..\config;..\..\..\..\..\..\components\softdevice\s110\headers;..\..\..\..\..\..\components\libraries\bootloader_dfu;..\..\..\..\..\..\components\ble\ble_services\ble_dfu;..\..\..\..\..\bsp;..\..\..\..\..\..\components\drivers_nrf\uart;..\..\..\..\..\..\components\ble\common;..\..\..\..\..\..\components\libraries\sensorsim;..\..\..\..\..\..\components\ble\ble_services\ble_nus;..\..\..\..\..\..\components\ble\ble_services\ble_hrs;..\..\..\..\..\..\components\ble\ble_services\ble_dis;..\..\..\..\..\..\components\ble\ble_services\ble_bas;..\..\..\..\..\..\components\ble\ble_advertising;..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\components\device;..\..\..\..\..\..\components\toolchain;..\..\..\..\..\..\components\libraries\fifo;..\..\..\..\..\..\components\libraries\button;..\..\..\..\..\..\components\ble\device_manager;..\..\..\..\..\..\components\softdevice\common\softdevice_handler;..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\components\drivers_nrf\hal;..\..\..\..\..\..\components\libraries\gpiote;..\..\..\..\..\..\components\drivers_nrf\pstorage;..\..\..\..\..\..\components\libraries\trace</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1012,6 +1012,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>ble_nus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\components\ble\ble_services\ble_nus\ble_nus.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2847,6 +2852,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>ble_nus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\components\ble\ble_services\ble_nus\ble_nus.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -48,6 +48,9 @@
 #include "bsp.h"
 #include "nrf_delay.h"
 
+#include "ble_nus.h"
+#include "app_uart.h"
+
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                          /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 
 #define WAKEUP_BUTTON_ID                 0                                          /**< Button used to wake up the application. */
@@ -106,12 +109,16 @@
 STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                     /** When having DFU Service support in application the Service Changed Characteristic should always be present. */
 #endif // BLE_DFU_APP_SUPPORT
 
+#define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
+#define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
+
 #define DFU_PIN													7
 #define MODE_PIN												11
 #define CONNECTED_LED										19
 #define MODE_LED												18
 #define FACTORY_RESET										16
 
+static ble_nus_t                         m_nus;                                      /**< Structure to identify the Nordic UART Service. */
 static uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID;   /**< Handle of the current connection. */
 static ble_bas_t                         m_bas;                                     /**< Structure used to identify the battery service. */
 static ble_hrs_t                         m_hrs;                                     /**< Structure used to identify the heart rate service. */
@@ -152,6 +159,27 @@ static void BlueFruitInit(void)
 		nrf_gpio_pin_clear(MODE_LED);
 		
 }
+
+/**@brief    Function for handling the data from the Nordic UART Service.
+ *
+ * @details  This function will process the data received from the Nordic UART BLE Service and send
+ *           it to the UART module.
+ *
+ * @param[in] p_nus    Nordic UART Service structure.
+ * @param[in] p_data   Data to be send to UART module.
+ * @param[in] length   Length of the data.
+ */
+/**@snippet [Handling the data received over BLE] */
+static void nus_data_handler(ble_nus_t * p_nus, uint8_t * p_data, uint16_t length)
+{
+    for (uint32_t i = 0; i < length; i++)
+    {
+        while(app_uart_put(p_data[i]) != NRF_SUCCESS);
+    }
+    while(app_uart_put('\n') != NRF_SUCCESS);
+}
+/**@snippet [Handling the data received over BLE] */
+
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -711,6 +739,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
     dm_ble_evt_handler(p_ble_evt);
+		ble_nus_on_ble_evt(&m_nus, p_ble_evt);
     ble_hrs_on_ble_evt(&m_hrs, p_ble_evt);
     ble_bas_on_ble_evt(&m_bas, p_ble_evt);
     ble_conn_params_on_ble_evt(p_ble_evt);
@@ -865,6 +894,80 @@ static void power_manage(void)
     APP_ERROR_CHECK(err_code);
 }
 
+/**@brief   Function for handling app_uart events.
+ *
+ * @details This function will receive a single character from the app_uart module and append it to 
+ *          a string. The string will be be sent over BLE when the last character received was a 
+ *          'new line' i.e '\n' (hex 0x0D) or if the string has reached a length of 
+ *          @ref NUS_MAX_DATA_LENGTH.
+ */
+/**@snippet [Handling the data received over UART] */
+void uart_event_handle(app_uart_evt_t * p_event)
+{
+    static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
+    static uint8_t index = 0;
+    uint32_t err_code;
+
+    switch (p_event->evt_type)
+    {
+        case APP_UART_DATA_READY:
+            UNUSED_VARIABLE(app_uart_get(&data_array[index]));
+            index++;
+
+            if ((data_array[index - 1] == '\n') || (index >= (BLE_NUS_MAX_DATA_LEN)))
+            {
+                err_code = ble_nus_string_send(&m_nus, data_array, index);
+                if (err_code != NRF_ERROR_INVALID_STATE)
+                {
+                    APP_ERROR_CHECK(err_code);
+                }
+                
+                index = 0;
+            }
+            break;
+
+        case APP_UART_COMMUNICATION_ERROR:
+            APP_ERROR_HANDLER(p_event->data.error_communication);
+            break;
+
+        case APP_UART_FIFO_ERROR:
+            APP_ERROR_HANDLER(p_event->data.error_code);
+            break;
+
+        default:
+            break;
+            }
+}
+/**@snippet [Handling the data received over UART] */
+
+
+/**@brief  Function for initializing the UART module.
+ */
+/**@snippet [UART Initialization] */
+static void uart_init(void)
+{
+    uint32_t err_code;
+    const app_uart_comm_params_t comm_params =
+      {
+          RX_PIN_NUMBER,
+          TX_PIN_NUMBER,
+          RTS_PIN_NUMBER,
+          CTS_PIN_NUMBER,
+          APP_UART_FLOW_CONTROL_DISABLED,
+          false,
+          UART_BAUDRATE_BAUDRATE_Baud38400
+      };
+
+    APP_UART_FIFO_INIT( &comm_params,
+                        UART_RX_BUF_SIZE,
+                        UART_TX_BUF_SIZE,
+                       uart_event_handle,
+                        APP_IRQ_PRIORITY_LOW,
+                        err_code);
+    APP_ERROR_CHECK(err_code);
+}
+/**@snippet [UART Initialization] */
+
 
 /**@brief Function for application main entry.
  */
@@ -877,6 +980,7 @@ int main(void)
     timers_init();
     APP_GPIOTE_INIT(1);
 		BlueFruitInit();
+		uart_init();
    // err_code = bsp_init(BSP_INIT_LED | BSP_INIT_BUTTONS,
                         //APP_TIMER_TICKS(100, APP_TIMER_PRESCALER),
                         //NULL);
