@@ -491,6 +491,15 @@ static void services_init(void)
     ble_dis_init_t dis_init;
     uint8_t        body_sensor_location;
 
+		ble_nus_init_t   nus_init;
+    
+    memset(&nus_init, 0, sizeof(nus_init));
+
+    nus_init.data_handler = nus_data_handler;
+    
+    err_code = ble_nus_init(&m_nus, &nus_init);
+    APP_ERROR_CHECK(err_code);
+	
     // Initialize Heart Rate Service.
     body_sensor_location = BLE_HRS_BODY_SENSOR_LOCATION_FINGER;
 
