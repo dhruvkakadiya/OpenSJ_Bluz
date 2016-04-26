@@ -27,10 +27,7 @@
 #include "tasks.hpp"
 #include "examples/examples.hpp"
 #include "io.hpp"
-#include "fat/disk/spi_flash.h"
 
-#define IMU                     0
-static uint8_t recv_buffer;
 QueueHandle_t receive_queue1;
 QueueHandle_t accel_queue;
 
@@ -97,86 +94,34 @@ void send_orientation(void *p){
     }
 }
 
-
-
-/**************************** UART-3 Interrupt Handler ******************/
-extern "C"
- {
-    void UART3_IRQHandle()
-    {
-        if((LPC_UART3->LSR & 1<<0))
-        {
-            recv_buffer = LPC_UART3 -> RBR;
-            xQueueSendFromISR(receive_queue1,&recv_buffer,0);
-        }
-        LE.toggle(1);
-    }
- }
-
-/**************************** UART-3 Initialization ******************/
-static void uart_init(uint32_t baudrate)
-{
-    LPC_SC->PCONP |= 1<<25;         //UART3 disabled by default so enable that
-    LPC_SC->PCLKSEL1 &= ~(3<<18);      //Peripheral clock select CLK/4 settings
-    LPC_PINCON->PINSEL9 &= ~(0xF<<24); //Set zero all bits of TX/RX pins
-    LPC_PINCON->PINSEL9 |= (0xF<<24);     //Select TX/RX pins
-    LPC_PINCON->PINMODE9 &= ~(0xF<<24); // Pull up all pins
-    LPC_UART3->LCR |= 3;    // 8 bit char length
-    LPC_UART3->LCR &= ~(1<<2);  // 1 Stop bit
-    LPC_UART3->LCR &= ~(1<<3);  // Parity Disable
-    LPC_UART3->LCR &= ~(1<<6);  // Disable Break Control
-    LPC_UART3->LCR |= (1<<7);   // Enable DLAB for baudrate
-    uint16_t baud = ((48000000/4)/(16*baudrate))+0.5;   // Baud calculation example
-    LPC_UART3->DLL = baud;          // Set LSB for Baud
-    LPC_UART3->DLM = baud>>8;       // Set MSB for Baud
-    LPC_UART3->LCR &= ~(1<<7);   // Disable DLAB for status read and interrupt generation
-    LPC_UART3->FCR |= 7;            // FIFO Enable - TX/RX FIFO Reset
-    LPC_UART3->FCR |= (3<<6);      // RX Trigger level-2(14 chars)
-    NVIC_EnableIRQ(UART3_IRQn);     // To enable NVIC interrupt from core_cm3.h
-    LPC_UART3->IER |= 5;        // Enable Transmit/Receive Interrupt
-    LPC_UART3->TER |= 1;        // Transmitter Enable
-}
-
-/**************************** UART-3 Transmit function ******************/
-static void uart_transmit(uint8_t arg){
-    // This function can handle continuous 16 characters transmission as FIFO is enable
-    // But for still safety side added while loop
-    while(!(LPC_UART3->LSR & 1<<5));    // Wait if previous character is in transmission
-    LPC_UART3->THR = arg;
-}
-
-/*************** Not used this function as receive interrupt is enabled *******/
-static uint8_t uart_receive(void){
-    while(!(LPC_UART3->LSR & 1<<0));    // Wait until character is not there
-    return LPC_UART3->RBR;
-}
-
 class UART_Task: public scheduler_task
 {
+    private :
+        Uart3& u3;
     public:
-        UART_Task(uint8_t priority) :
-                scheduler_task("UART_Task", 2000, priority)
+        UART_Task(uint8_t priority):
+                scheduler_task("UART_Task", 2000, priority),u3(Uart3::getInstance())
         {
             // Nothing to init
         }
 
         bool init(void)
         {
-            receive_queue1 = xQueueCreate(20, 1*sizeof(char));    //It will create queue of 10 characters
-            uart_init(38400);
+            AS.init();      // Initialize Accelerometer sensor
+            LS.init();      // Initialize Light sensor
+            u3.init(38400); // Initialize UART3
             return true;
         }
 
         bool run(void *p)
         {
-            static uint8_t trans_char = 'A';
-
-            uart_transmit(trans_char++);
-
-            if(trans_char=='Z'){
-                trans_char = 'A';
-            }
-            vTaskDelay(500);
+            int16_t accel_x = AS.getX();    // Read Accel-X data
+            int16_t accel_y = AS.getY();    // Read Accel-Y data
+            int16_t accel_z = AS.getZ();    // Read Accel-Z data
+            uint16_t light_value = LS.getRawValue();    // Read Temperature data
+            //LE.toggle(1);
+            u3.printf("%d %d %d %d\n",accel_x,accel_y,accel_z,light_value);
+            vTaskDelay(100);
             return true;
         }
 };

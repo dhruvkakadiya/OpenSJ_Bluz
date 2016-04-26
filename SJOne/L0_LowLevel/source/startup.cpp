@@ -71,7 +71,7 @@ void TIMER3_IRQHandler(void) ALIAS(isr_default_handler);
 void UART0_IRQHandler(void)  ALIAS(isr_default_handler);
 void UART1_IRQHandler(void)  ALIAS(isr_default_handler);
 void UART2_IRQHandler(void)   ALIAS(isr_default_handler);
-void UART3_IRQHandle(void)  ALIAS(isr_default_handler);
+void UART3_IRQHandler(void)  ALIAS(isr_default_handler);
 void PWM1_IRQHandler(void)   ALIAS(isr_default_handler);
 void I2C0_IRQHandler(void)   ALIAS(isr_default_handler);
 void I2C1_IRQHandler(void)   ALIAS(isr_default_handler);
@@ -302,7 +302,7 @@ static isr_func_t g_isr_array[] = {
         UART0_IRQHandler,       // 21, 0x54 - UART0
         UART1_IRQHandler,       // 22, 0x58 - UART1
         UART2_IRQHandler,       // 23, 0x5c - UART2
-        UART3_IRQHandle,       // 24, 0x60 - UART3
+        UART3_IRQHandler,       // 24, 0x60 - UART3
         PWM1_IRQHandler,        // 25, 0x64 - PWM1
         I2C0_IRQHandler,        // 26, 0x68 - I2C0
         I2C1_IRQHandler,        // 27, 0x6c - I2C1
