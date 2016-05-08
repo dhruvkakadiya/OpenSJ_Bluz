@@ -2,4 +2,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 <item android:title="Settings" android:id="@+id/mnuItemSettings" app:showAsAction="always"></item>
+    <item android:title="View graph" android:id="@+id/mnuItemViewGraph" app:showAsAction="always"></item>
 </menu>

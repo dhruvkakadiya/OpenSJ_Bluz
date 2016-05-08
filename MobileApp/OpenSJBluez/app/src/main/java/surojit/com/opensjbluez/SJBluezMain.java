@@ -16,6 +16,7 @@ public class SJBluezMain extends AppCompatActivity {
 
     TextView lMainTxt;
     SurfaceView lSfcView;
+    private String mSelectedDeviceMac;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +31,12 @@ public class SJBluezMain extends AppCompatActivity {
             Intent i = new Intent(this, ActivitySettings.class);
             startActivityForResult(i, 1);
         }
+        else if (item.getItemId() == R.id.mnuItemViewGraph)
+        {
+            Intent i = new Intent(this, ActivitySettings.class);
+            i.putExtra("mac",mSelectedDeviceMac);
+            startActivity(i);
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -39,6 +46,7 @@ public class SJBluezMain extends AppCompatActivity {
         if (requestCode == 1 && resultCode == 1) {
             String lMac = data.getStringExtra("mac");
             lMainTxt.setText("Selected device: " + lMac);
+            mSelectedDeviceMac = lMac;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

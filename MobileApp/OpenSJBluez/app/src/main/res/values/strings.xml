@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">OpenSJBluez</string>
+    <string name="title_activity_activity_graph">Graph</string>
 </resources>
