@@ -125,6 +125,7 @@ public class ActivitySettings extends AppCompatActivity implements AdapterView.O
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        mBLEManager.stopScan(mScanCallbackLE);
         SSBLEDevice lDevice = (SSBLEDevice) mDevicesAdapter.getItem(i);
         Intent intent=new Intent();
         intent.putExtra("mac",lDevice.mDevice.getAddress());

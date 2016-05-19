@@ -1,5 +1,6 @@
 package surojit.com.opensjbluez;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
 
@@ -15,6 +16,8 @@ public class BLEManager extends ScanCallback {
         this.mBluetoothManager = pBluetoothManager;
     }
 
+
+
     public void startScan(ScanCallback pScanCallback)
     {
         mBluetoothManager.getAdapter().getBluetoothLeScanner().startScan(pScanCallback);
@@ -24,4 +27,5 @@ public class BLEManager extends ScanCallback {
     {
         mBluetoothManager.getAdapter().getBluetoothLeScanner().stopScan(pScanCallback);
     }
+
 }
