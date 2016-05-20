@@ -119,9 +119,9 @@ class UART_Task: public scheduler_task
             int16_t accel_y = AS.getY();    // Read Accel-Y data
             int16_t accel_z = AS.getZ();    // Read Accel-Z data
             uint16_t light_value = LS.getRawValue();    // Read Temperature data
-            //LE.toggle(1);
+            LE.toggle(1);
             u3.printf("%d %d %d %d\n",accel_x,accel_y,accel_z,light_value);
-            vTaskDelay(100);
+            vTaskDelay(200);
             return true;
         }
 };

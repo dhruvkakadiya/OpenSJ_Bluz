@@ -3,4 +3,5 @@
     <string name="title_activity_activity_graph">Graph</string>
     <string name="FIREBASE_URL">https://radiant-heat-8807.firebaseio.com/</string>
     <string name="firebase_opensj_blues_sensors">OpenSJBluez/sensors</string>
+    <string name="firebase_opensj_blues_sensors_readings">OpenSJBluez/sensor_readings</string>
 </resources>

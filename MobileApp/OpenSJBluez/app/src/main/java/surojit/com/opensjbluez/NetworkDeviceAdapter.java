@@ -25,7 +25,7 @@ public class NetworkDeviceAdapter extends BaseAdapter {
 
     Firebase mFirebase = null;
     Context mContext;
-    LinkedList<BaseSensor> mSensorsList;
+    LinkedList<String> mSensorsList;
 
 
     public NetworkDeviceAdapter(Context pContext)
@@ -48,7 +48,7 @@ public class NetworkDeviceAdapter extends BaseAdapter {
                     while(i.hasNext())
                     {
                         DataSnapshot lChildSnapshot = (DataSnapshot) i.next();
-                        BaseSensor lSensor = lChildSnapshot.getValue(BaseSensor.class);
+                        String lSensor = lChildSnapshot.getKey();
                         mSensorsList.add(lSensor);
                     }
                 }
@@ -95,27 +95,26 @@ public class NetworkDeviceAdapter extends BaseAdapter {
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
 
-        if(mSensorsList.size() <= 0)
-        {
-            TextView lTextView = new TextView(viewGroup.getContext());
-            lTextView.setText("No connected sensors detected");
-            return lTextView;
-        }
-
-
-
         if(view == null || view instanceof TextView)
         {
             LayoutInflater lInflater = LayoutInflater.from(viewGroup.getContext());
             view = lInflater.inflate(R.layout.device_row,viewGroup,false);
         }
 
-        TextView lMain = (TextView) view.findViewById(R.id.txtMain);
-        TextView lSub = (TextView) view.findViewById(R.id.txtMain);
 
-        BaseSensor lSensor = mSensorsList.get(i);
-        lMain.setText(lSensor.mSensorAddress);
-        lSub.setText("");
-        return null;
+        TextView lMain = (TextView) view.findViewById(R.id.txtMain);
+        TextView lSub = (TextView) view.findViewById(R.id.txtSub);
+        if(mSensorsList.size() <= 0)
+        {
+                lMain.setText("Retrieving list of connected sensors...");
+                lSub.setText("");
+        }
+        else {
+//        BaseSensor lSensor = mSensorsList.get(i);
+            String lSensor = mSensorsList.get(i);
+            lMain.setText(lSensor);
+            lSub.setText("");
+        }
+        return view;
     }
 }
