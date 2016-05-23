@@ -35,10 +35,12 @@ public class BallThread extends Thread {
             mShapeView.updateOvalCenter();
             c = null;
             try {
-                c = mSurfaceHolder.lockCanvas(null);
-                synchronized (mSurfaceHolder) {
-                    mShapeView.onDraw(c);
-                }
+                c = mSurfaceHolder.lockCanvas();
+
+                    if(c!=null) {
+                        mShapeView.onDraw(c);
+                    }
+
             } finally {
                 if (c != null) {
                     mSurfaceHolder.unlockCanvasAndPost(c);

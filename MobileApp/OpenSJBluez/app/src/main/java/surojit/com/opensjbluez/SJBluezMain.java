@@ -76,12 +76,15 @@ public class SJBluezMain extends AppCompatActivity implements BallCallback {
         if(lPos == null)
         {
             xAccl = 0;
+            yAccl = 0;
         }
         else
         {
-            String []parts = lPos.split(" ");
+            String []parts = lPos.trim().split(" ");
             xAccl = (float) Integer.parseInt(parts[0]);
+            yAccl = (float)  Integer.parseInt(parts[1]);
             xAccl = xAccl / 10.0f;
+            yAccl = yAccl / 10.0f;
         }
         return  xAccl;
     }
@@ -89,17 +92,17 @@ public class SJBluezMain extends AppCompatActivity implements BallCallback {
 
     @Override
     public float getYAcceleration() {
-        String lPos = mQueue.poll();
-        if(lPos == null)
-        {
-            yAccl = 0;
-        }
-        else
-        {
-            String []parts = lPos.split(" ");
-            yAccl = (float) Integer.parseInt(parts[1]);
-            yAccl = yAccl / 10.0f;
-        }
+//        String lPos = mQueue.poll();
+//        if(lPos == null)
+//        {
+//            yAccl = 0;
+//        }
+//        else
+//        {
+//            String []parts = lPos.trim().split(" ");
+//            yAccl = (float) Integer.parseInt(parts[1]);
+//            yAccl = yAccl / 10.0f;
+//        }
         return  yAccl;
     }
 
@@ -414,17 +417,22 @@ public class SJBluezMain extends AppCompatActivity implements BallCallback {
     private void ClearConnections() {
         mConnectedDevice = null;
         mSelectedDeviceMac = "";
-        if (mScanCallback != null) {
-            mBLEManager.stopScan(mScanCallback);
-        }
+
         if (mConnectedGatt != null) {
             mConnectedGatt.disconnect();
             mConnectedGatt.close();
         }
+
+        if (mScanCallback != null) {
+            mBLEManager.stopScan(mScanCallback);
+        }
+
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        ClearConnections();
         if (item.getItemId() == R.id.mnuItemSettings) {
             Intent i = new Intent(this, ActivitySettings.class);
             ClearConnections();

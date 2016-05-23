@@ -407,9 +407,17 @@ public class ActivityGraph extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
+    protected void onStop() {
+        ClearConnections();
+        super.onStop();
+    }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, final Intent data) {
+        if(resultCode == RESULT_CANCELED) { return; }
+
         if(requestCode == 1)
         {
             //BLE device selected
@@ -556,7 +564,6 @@ public class ActivityGraph extends AppCompatActivity {
             mConnectedGatt.disconnect();
             mConnectedGatt.close();
         }
-
 
     }
 
