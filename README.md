@@ -10,6 +10,6 @@ CMPE244 project : Nordic BLE data logger and real time plots, Push data to the c
 * Then Smart phone will draw real time graphs for each sensor.
 * Android mobile application will push all data to cloud.
 
-## [Project Wiki Page] (http://www.socialledge.com/sjsu/index.php?title=S16:_OpenSJ_Bluz)
+## [Project Wiki Page](http://www.socialledge.com/sjsu/index.php?title=S16:_OpenSJ_Bluz)
 
-## [Project Video] (https://www.youtube.com/watch?v=LRJrV8Myees&index=8&list=PL-CEoXs6LMVUpjYvq3eZTejITD_4A0Lij)
+## [Project Video](https://www.youtube.com/watch?v=LRJrV8Myees&index=8&list=PL-CEoXs6LMVUpjYvq3eZTejITD_4A0Lij)
